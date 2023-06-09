@@ -1,4 +1,4 @@
-import { Dimension } from "./dimention.js";
+import { Dimension } from "./dimension.js";
 
 const EVENT_BEFORE_TOGGLE = "beforetoggle";
 const EVENT_RESIZE = "resize";
