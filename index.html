@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="button.css" />
+
+    <title>Popover Demo</title>
+  </head>
+  <body>
+    <header>
+      <div class="actions">
+        <div class="placement-selection">
+          <button
+            class="base-button base-button--outline"
+            popovertarget="placement"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            Select popover placement
+          </button>
+
+          <div id="placement" class="menu-content" role="menu" popover>
+            <button class="base-button menu-button" role="menuitem" value="top">
+              Top ⬆️
+            </button>
+            <button
+              class="base-button menu-button"
+              role="menuitem"
+              value="right"
+            >
+              Right ➡️
+            </button>
+            <button
+              class="base-button menu-button"
+              role="menuitem"
+              value="bottom"
+            >
+              Bottom ⬇️
+            </button>
+            <button
+              class="base-button menu-button"
+              role="menuitem"
+              value="left"
+            >
+              Left ⬅️
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="root">
+      <div class="popover-example">
+        <button
+          class="base-button base-button--outline"
+          popovertarget="menu"
+          draggable="true"
+          aria-haspopup="true"
+          aria-expanded="false"
+        >
+          Show some awesome options
+        </button>
+        <div id="menu" class="menu-content" role="menu" popover>
+          <button class="base-button menu-button" role="menuitem">
+            Option 1 🥸
+          </button>
+          <button class="base-button menu-button" role="menuitem">
+            Option 2 💀
+          </button>
+          <button class="base-button menu-button" role="menuitem">
+            Option 3 💅
+          </button>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      import { Popover } from "./popover.js";
+
+      const setpupPopoverExample = (
+        { placement, offset } = {
+          placement: "bottom",
+          offset: 10,
+        }
+      ) => {
+        const popoverExample = document.querySelector(
+          `.popover-example [popover]`
+        );
+        const popoverExampleOpener = document.querySelector(
+          `.popover-example [popovertarget="${popoverExample?.id}"]`
+        );
+
+        new Popover(popoverExampleOpener, popoverExample, {
+          placement,
+          offset,
+          presentationMode: true,
+        });
+
+        popoverExample.addEventListener("click", () => {
+          popoverExample.togglePopover();
+        });
+
+        window.document.addEventListener("dragstart", (event) => {
+          const rect = event.target.getBoundingClientRect();
+          const offsets = {
+            offsetX: event.x - rect.x,
+            offsetY: event.y - rect.y,
+          };
+          event.dataTransfer.setData("text", JSON.stringify(offsets));
+        });
+
+        window.document.addEventListener("dragover", (event) => {
+          // prevent default to allow drop
+          event.preventDefault();
+        });
+        window.document.addEventListener("drop", (event) => {
+          event.preventDefault();
+          const offsets = JSON.parse(event.dataTransfer.getData("text"));
+
+          popoverExampleOpener.style.left = `${
+            event.clientX - offsets.offsetX
+          }px`;
+          popoverExampleOpener.style.top = `${
+            event.clientY - offsets.offsetY
+          }px`;
+          popoverExampleOpener.style.position = "fixed";
+          popoverExampleOpener.style.zIndex = "1";
+          popoverExampleOpener.style.backgroundColor = "white";
+        });
+      };
+
+      const setupPopoverPlacement = () => {
+        const popover = document.querySelector(
+          `.placement-selection [popover]`
+        );
+        const popoverOpener = document.querySelector(
+          `.placement-selection [popovertarget="${popover?.id}"]`
+        );
+
+        const placementButtons = document.querySelectorAll(
+          `.placement-selection [role="menuitem"]`
+        );
+
+        new Popover(popoverOpener, popover, {});
+
+        Array.from(placementButtons).forEach((btn) =>
+          btn.addEventListener("click", ({ currentTarget }) => {
+            setpupPopoverExample({
+              placement: currentTarget.value,
+              offset: 20,
+            });
+            popoverOpener.textContent = currentTarget.textContent;
+          })
+        );
+      };
+
+      window.onload = () => {
+        setpupPopoverExample();
+        setupPopoverPlacement();
+      };
+    </script>
+  </body>
+</html>
